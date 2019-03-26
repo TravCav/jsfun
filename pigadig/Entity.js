@@ -4,8 +4,6 @@ let messaging = require('./messaging');
 //stuff you can encounter in adventure
 const entities = [{
     name: "guineapig",
-    hp: 1,
-    dropitems: [],
     attacks: [{
         name: "poopy turd",
         damage: 1,
@@ -14,7 +12,6 @@ const entities = [{
 },
 {
     name: "flower",
-    hp: 1,
     dropitems: [{
       item:"oxygen",
       qty:1
@@ -26,9 +23,7 @@ const entities = [{
     }]
 },
 {
-    name: "potato",
-    hp: 1,
-    dropitems: []
+    name: "potato"
 },
 {
     name: "watermelone",
@@ -37,6 +32,123 @@ const entities = [{
         item: "water",
         qty: 2
     }]
+},
+{
+  name: "nacho",
+  hp:4,
+  dropitems:[{
+      item:"coin",
+      qty:1
+  }],
+  attacks: [{
+    name:"cheesy lava",
+    damage:2,
+    description: "intermediate attack"
+  }]
+},
+{
+  name: "grumpy narwhal",
+  hp:10,
+  dropitems:[{
+      item:"water",
+      qty:3
+  }],
+  attacks: [{
+    name:"pokey splash",
+    damage:1,
+    description: "a basic attack"
+  }]
+},
+{
+  name: "pickle",
+  hp:1,
+  dropitems:[{
+      item:"vinegar",
+      qty:1
+  }],
+  attacks: [{
+    name:"acidic spit",
+    damage:1,
+    description: "a basic attack"
+  }]
+},
+{
+  name: "cheap skate",
+  hp:12,
+  dropitems:[{
+      item:"stone",
+      qty:1
+  }],
+  attacks: [{
+    name:"penny pinch",
+    damage:1,
+    description: "a basic attack"
+  }]
+},
+{
+  name: "slipper",
+  hp:3,
+  dropitems:[{
+      item:"wood",
+      qty:1
+  }],
+  attacks: [{
+    name:"slipper slap",
+    damage:1,
+    description: "a basic attack"
+  }]
+},
+{
+  name: "chunky monkey",
+  hp:6,
+  dropitems:[{
+      item:"milk",
+      qty:1
+  }],
+  attacks: [{
+    name:"dairy devil spin",
+    damage:2,
+    description: "intermediate attack"
+  }]
+},
+{
+  name: "canada geese",
+  hp:2,
+  dropitems:[{
+      item:"feather",
+      qty:1
+  }],
+  attacks: [{
+    name:"noisy gaggle",
+    damage:1,
+    description: "a basic attack"
+  }]
+},
+{
+  name: "olaf",
+  hp:4,
+  dropitems:[{
+      item:"water",
+      qty:1
+  }],
+  attacks: [{
+    name:"cold shoulder",
+    damage:1,
+    description: "a basic attack"
+  }]
+},
+{
+  name: "overwatch community",
+  hp:6,
+  dropitems:[{
+      item:"salt",
+      qty:1
+  }],
+  attacks: [{
+    name:"poser mentality",
+    damage:2,
+    description: "intermediate attack"
+  }]
 }
 ];
 
@@ -45,14 +157,15 @@ const entities = [{
 class Entity {
     constructor(parameters) {
       this.name = parameters.name;
-      this.maxHp = parameters.hp;
-      this.hp = parameters.hp;
+      this.maxHp = parameters.hp || 1;
+      this.hp = parameters.hp || 1;
+      this.str = parameters.str || 1;
       this.dropitems = parameters.dropitems || [];
       this.inventory = [];
       this.timeSpent = 0;
       this.attacks = parameters.attacks || [{
         name: "melee",
-        damage: 1,
+        damage: 1 + this.str,
         description: "a basic attack"
       }];
     }
@@ -65,6 +178,7 @@ class Entity {
       }
       this.timeSpent++;
       entity.TakeDamage(attack);
+      this.str += 0.01;
     }
   
     DeconstructItem(itemName) {

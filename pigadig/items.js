@@ -17,6 +17,34 @@ const items = [{
         value: 1
     },
     {
+        name: "vinegar",
+        value: 1
+    },
+    {
+        name: "feather",
+        value: 1
+    },
+    {
+        name: "stone",
+        value: 1
+    },
+    {
+        name: "wood",
+        value: 1
+    },
+    {
+        name: "iron",
+        value: 1
+    },
+    {
+        name: "salt",
+        value: 1
+    },
+    {
+        name: "milk",
+        value: 1
+    },
+    {
         name: "water",
         craftTime: 10,
         value: 3,

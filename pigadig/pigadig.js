@@ -95,86 +95,93 @@ function Fight(entity) {
   }
 }
 
-let rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
 function DoAdventure() {
 
   console.log("And here our adventure begins...");
 
-  // // while (player.hp > 0) {
-  // //   while (player.HasItems('hydrogen', 2) && player.HasItems('oxygen', 1)) {
-  // //     player.MakeItem('water');
-  // //   }
+  while (player.hp > 0) {
+    while (player.HasItems('hydrogen', 2) && player.HasItems('oxygen', 1)) {
+      player.MakeItem('water');
+    }
 
-  // //   while (player.hp < player.maxHp && player.HasItems('water', 1)) {
-  // //     player.UseItem("water");
-  // //   }
+    while (player.hp < player.maxHp && player.HasItems('water', 1)) {
+      player.UseItem("water");
+    }
 
-  // //   GoAdventuring();
-  // // }
+    GoAdventuring();
+  }
 
-  // // player.SellItem('water');
-  // // player.BuyItem('hydrogen');
-  WanderAbout();
-  DeliveryQuest();
-  FightSomething();
+  // // // // player.SellItem('water');
+  // // // // player.BuyItem('hydrogen');
+  // // WanderAbout();
+  // // DeliveryQuest();
+  // // FightSomething();
 
-  Items.GiveItems(player, 'hydrogen', 2);
-  Items.GiveItems(player, 'oxygen', 1);
-  player.MakeItem('water');
-  player.UseItem('water');
+  // // Items.GiveItems(player, 'hydrogen', 2);
+  // // Items.GiveItems(player, 'oxygen', 1);
+  // // player.MakeItem('water');
+  // // player.UseItem('water');
 
-  Items.GiveItems(player, 'water', 1);
-  player.DeconstructItem('water');
+  // // Items.GiveItems(player, 'water', 1);
+  // // player.DeconstructItem('water');
 
-  player.SellItem('hydrogen');
+  // // player.SellItem('hydrogen');
 
-  player.BuyItem('oxygen');
+  // // player.BuyItem('oxygen');
 
   console.log("Finished with: \r\n", player);
   console.log("Farewell");
 }
 
+function InteractiveMode() {
 
-rl.question('What is your name? ', (answer) => {
-  console.log(`Thanks for playing ${answer}`);
-  console.log('Please choose what you want to do next.');
-  console.log('You can Adventure, Quest, Fight, or Quit.');
-  console.log('What do you want to do?');
-  //DoAdventure();
+  let rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 
-});
+  rl.question('What is your name? ', (answer) => {
+    console.log(`Thanks for playing ${answer}`);
+    console.log('Please choose what you want to do next.');
+    console.log('You can Adventure, Quest, Fight, or Quit.');
+    console.log('What do you want to do?');
+    //DoAdventure();
+
+  });
 
 
-rl.on('line', (line) => {
-  console.log(`You chose to ${line}`);
-  switch (line.toLowerCase()) {
-    case 'adventure':
-      WanderAbout();
-      console.log('You can Adventure, Quest, Fight, or Quit.');
-      console.log('What do you want to do?');
-      break;
-    case 'quest':
-      DeliveryQuest();
-      console.log('You can Adventure, Quest, Fight, or Quit.');
-      console.log('What do you want to do?');
-      break;
-    case 'fight':
-      FightSomething();
-      console.log('You can Adventure, Quest, Fight, or Quit.');
-      console.log('What do you want to do?');
-      break;
-    case 'quit':
-      console.log('Thanks for playing.');
-      rl.close();
-      break;
-    default:
-      WanderAbout();
-      console.log('You can Adventure, Quest, Fight, or Quit.');
-      console.log('What do you want to do?');
-      break;
-  }
-});
+  rl.on('line', (line) => {
+    console.log(`You chose to ${line}`);
+    switch (line.toLowerCase()) {
+      case 'adventure':
+        DoAdventure();
+        console.log('You can Adventure, Quest, Fight, or Quit.');
+        console.log('What do you want to do?');
+        break;
+      case 'quest':
+        DeliveryQuest();
+        console.log('You can Adventure, Quest, Fight, or Quit.');
+        console.log('What do you want to do?');
+        break;
+      case 'fight':
+        FightSomething();
+        console.log('You can Adventure, Quest, Fight, or Quit.');
+        console.log('What do you want to do?');
+        break;
+      case 'quit':
+        console.log('Thanks for playing.');
+        rl.close();
+        break;
+      default:
+        WanderAbout();
+        console.log('You can Adventure, Quest, Fight, or Quit.');
+        console.log('What do you want to do?');
+        break;
+    }
+  });
+}
+
+
+DoAdventure();
+//InteractiveMode();
