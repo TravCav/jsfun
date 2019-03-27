@@ -15,4 +15,4 @@ for (var pos = 0; pos < 1000; pos++) {
     newText.push(textArray[tryPos + 2]);
 }
 
-console.log(newText.join(" "));
+////console.log(newText.join(" "));
