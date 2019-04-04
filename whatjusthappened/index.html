@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            background-color: #000000;
+            margin: 0px;
+        }
+
+        canvas,
+        img {
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+    </style>
+    <title>What Just Happened</title>
+</head>
+
+<body>
+
+    <p id="locP" style="color: white"></p>
+
+    <canvas id="gridCanvas" width="1000" height="1000"></canvas>
+
+
+    <script>
+        var locP = document.getElementById("locP");
+        let cvs = document.getElementById("gridCanvas");
+        let ctx = cvs.getContext("2d");
+
+        ctx.canvas.width = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+        let centerX = ctx.canvas.width / 2;
+        let centerY = ctx.canvas.height / 2;
+        let pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+
+        var scale = 1000000;
+
+        let locations = [];
+        let storageLocations = JSON.parse(localStorage.getItem("locations"));
+        if (storageLocations != null) {
+            locations = storageLocations;
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(showPosition);
+            } else {
+                locP.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showPosition(position) {
+            locP.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
+            let lastLoc = locations[locations.length - 1];
+            if (locations.length === 0 || (position.coords.latitude !== lastLoc.lat && position.coords.longitude !== lastLoc.long)) {
+                locations.push({ lat: position.coords.latitude, long: position.coords.longitude });
+                let jsonLoc = JSON.stringify(locations);
+                localStorage.setItem("locations", jsonLoc);
+            }
+
+            pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+            for (let index = locations.length - 1; index >= 0; index--) {
+                const element = locations[index];
+                let x = centerX + ((element.long - position.coords.longitude) * scale);
+                let y = centerY - ((element.lat - position.coords.latitude) * scale);
+                putPixel(x, y);
+            }
+        }
+
+        function putPixel(x, y) {
+            console.log(x, y);
+            x = Math.floor(x);
+            y = Math.floor(y);
+            if (!(
+                x < 1 ||
+                y < 1 ||
+                x > ctx.canvas.width ||
+                y > ctx.canvas.height
+            )) {
+                const i = (x + y * ctx.canvas.width) * 4;
+                pixels.data[i] = 255;
+                pixels.data[i + 1] = 255;
+                pixels.data[i + 2] = 255;
+                pixels.data[i + 3] = 255;
+                ctx.putImageData(pixels, 0, 0);
+            } else {
+                scale /= 2;
+            }
+        }
+
+        ctx.canvas.width = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+        centerX = Math.floor(ctx.canvas.width / 2);
+        centerY = Math.floor(ctx.canvas.height / 2);
+
+        // clear screen
+        pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+        // // for (let index = 0; index < 10; index++) {
+        // //     let x = centerX + index;
+        // //     let y = centerY - index;
+        // //     putPixel(x,y);
+        // // }
+        getLocation();
+
+    </script>
+
+</body>
+
+</html>
