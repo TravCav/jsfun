@@ -22,13 +22,15 @@
 
 <body>
 
-    <p id="locP" style="color: white"></p>
+        <p id="locP" style="color: white">Loading...</p>
+        <p id="pointsP" style="color: white"></p>
 
     <canvas id="gridCanvas" width="1000" height="1000"></canvas>
 
 
     <script>
-        var locP = document.getElementById("locP");
+        let total = 0;
+        let locP = document.getElementById("locP");
         let cvs = document.getElementById("gridCanvas");
         let ctx = cvs.getContext("2d");
 
@@ -38,12 +40,31 @@
         let centerY = ctx.canvas.height / 2;
         let pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
 
-        var scale = 1000000;
+        let scale = 1000000;
 
         let locations = [];
         let storageLocations = JSON.parse(localStorage.getItem("locations"));
         if (storageLocations != null) {
             locations = storageLocations;
+        }
+
+
+        function DrawScreen() {
+            ctx.canvas.width = window.innerWidth;
+            ctx.canvas.height = window.innerHeight;
+            centerX = Math.floor(ctx.canvas.width / 2);
+            centerY = Math.floor(ctx.canvas.height / 2);
+
+            pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+            const lastPosition = locations[locations.length - 1];
+            for (let index = locations.length - 1; index >= 0; index--) {
+                const element = locations[index];
+
+                let x = centerX + ((element.long - lastPosition.long) * scale);
+                let y = centerY - ((element.lat - lastPosition.lat) * scale);
+                putPixel(x, y);
+            }
+            ctx.putImageData(pixels, 0, 0);
         }
 
         function getLocation() {
@@ -54,22 +75,17 @@
             }
         }
 
-        function showPosition(position) {
-            locP.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
-            let lastLoc = locations[locations.length - 1];
-            if (locations.length === 0 || (position.coords.latitude !== lastLoc.lat && position.coords.longitude !== lastLoc.long)) {
-                locations.push({ lat: position.coords.latitude, long: position.coords.longitude });
-                let jsonLoc = JSON.stringify(locations);
-                localStorage.setItem("locations", jsonLoc);
+        function GetScore() {
+            const lastPosition = locations[locations.length - 1];
+            for (let index = 1, locLen = locations.length; index < locLen; index++) {
+                const curr = locations[index];
+                const prev = locations[index-1];
+                const dx = curr.long - prev.long;
+                const dy = curr.lat - prev.lat;
+                const dv = Math.sqrt((dx*dx)+(dy*dy));
+                total += dv;
             }
-
-            pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
-            for (let index = locations.length - 1; index >= 0; index--) {
-                const element = locations[index];
-                let x = centerX + ((element.long - position.coords.longitude) * scale);
-                let y = centerY - ((element.lat - position.coords.latitude) * scale);
-                putPixel(x, y);
-            }
+            document.getElementById("locP").innerText = total;
         }
 
         function putPixel(x, y) {
@@ -87,24 +103,26 @@
                 pixels.data[i + 1] = 255;
                 pixels.data[i + 2] = 255;
                 pixels.data[i + 3] = 255;
-                ctx.putImageData(pixels, 0, 0);
+
             } else {
                 scale /= 2;
             }
         }
 
-        ctx.canvas.width = window.innerWidth;
-        ctx.canvas.height = window.innerHeight;
-        centerX = Math.floor(ctx.canvas.width / 2);
-        centerY = Math.floor(ctx.canvas.height / 2);
+        function showPosition(position) {
+            locP.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
+            let lastLoc = locations[locations.length - 1];
+            if (locations.length === 0 || (position.coords.latitude !== lastLoc.lat && position.coords.longitude !== lastLoc.long)) {
+                locations.push({ lat: position.coords.latitude, long: position.coords.longitude });
+                let jsonLoc = JSON.stringify(locations);
+                localStorage.setItem("locations", jsonLoc);
+            }
 
-        // clear screen
-        pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
-        // // for (let index = 0; index < 10; index++) {
-        // //     let x = centerX + index;
-        // //     let y = centerY - index;
-        // //     putPixel(x,y);
-        // // }
+            DrawScreen();
+        }
+
+        GetScore();
+        DrawScreen();
         getLocation();
 
     </script>
