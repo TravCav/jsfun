@@ -21,111 +21,13 @@
 </head>
 
 <body>
-
-        <p id="locP" style="color: white">Loading...</p>
-        <p id="pointsP" style="color: white"></p>
-
+    <p id="locP" style="color: white">Loading...</p>
+    <p id="pointsP" style="color: white"></p>
+    <button onclick="Scale(0.5)">[-]</button><button onclick="Scale(2);">[+]</button>
     <canvas id="gridCanvas" width="1000" height="1000"></canvas>
 
 
-    <script>
-        let total = 0;
-        let locP = document.getElementById("locP");
-        let cvs = document.getElementById("gridCanvas");
-        let ctx = cvs.getContext("2d");
-
-        ctx.canvas.width = window.innerWidth;
-        ctx.canvas.height = window.innerHeight;
-        let centerX = ctx.canvas.width / 2;
-        let centerY = ctx.canvas.height / 2;
-        let pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
-
-        let scale = 1000000;
-
-        let locations = [];
-        let storageLocations = JSON.parse(localStorage.getItem("locations"));
-        if (storageLocations != null) {
-            locations = storageLocations;
-        }
-
-
-        function DrawScreen() {
-            ctx.canvas.width = window.innerWidth;
-            ctx.canvas.height = window.innerHeight;
-            centerX = Math.floor(ctx.canvas.width / 2);
-            centerY = Math.floor(ctx.canvas.height / 2);
-
-            pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
-            const lastPosition = locations[locations.length - 1];
-            for (let index = locations.length - 1; index >= 0; index--) {
-                const element = locations[index];
-
-                let x = centerX + ((element.long - lastPosition.long) * scale);
-                let y = centerY - ((element.lat - lastPosition.lat) * scale);
-                putPixel(x, y);
-            }
-            ctx.putImageData(pixels, 0, 0);
-        }
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(showPosition);
-            } else {
-                locP.innerHTML = "Geolocation is not supported by this browser.";
-            }
-        }
-
-        function GetScore() {
-            const lastPosition = locations[locations.length - 1];
-            for (let index = 1, locLen = locations.length; index < locLen; index++) {
-                const curr = locations[index];
-                const prev = locations[index-1];
-                const dx = curr.long - prev.long;
-                const dy = curr.lat - prev.lat;
-                const dv = Math.sqrt((dx*dx)+(dy*dy));
-                total += dv;
-            }
-            document.getElementById("locP").innerText = total;
-        }
-
-        function putPixel(x, y) {
-            console.log(x, y);
-            x = Math.floor(x);
-            y = Math.floor(y);
-            if (!(
-                x < 1 ||
-                y < 1 ||
-                x > ctx.canvas.width ||
-                y > ctx.canvas.height
-            )) {
-                const i = (x + y * ctx.canvas.width) * 4;
-                pixels.data[i] = 255;
-                pixels.data[i + 1] = 255;
-                pixels.data[i + 2] = 255;
-                pixels.data[i + 3] = 255;
-
-            } else {
-                scale /= 2;
-            }
-        }
-
-        function showPosition(position) {
-            locP.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
-            let lastLoc = locations[locations.length - 1];
-            if (locations.length === 0 || (position.coords.latitude !== lastLoc.lat && position.coords.longitude !== lastLoc.long)) {
-                locations.push({ lat: position.coords.latitude, long: position.coords.longitude });
-                let jsonLoc = JSON.stringify(locations);
-                localStorage.setItem("locations", jsonLoc);
-            }
-
-            DrawScreen();
-        }
-
-        GetScore();
-        DrawScreen();
-        getLocation();
-
-    </script>
+    <script src="wjh.js"></script>
 
 </body>
 
