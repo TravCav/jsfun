@@ -16,15 +16,46 @@
             image-rendering: optimize-contrast;
             -ms-interpolation-mode: nearest-neighbor;
         }
+
+        .button {
+            background-color: #4CAF50;
+            /* Green */
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 30px;
+            margin: 4px 2px;
+            -webkit-transition-duration: 0.4s;
+            /* Safari */
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            color: black;
+            border: 2px solid lightgrey;
+        }
+
     </style>
     <title>What Just Happened</title>
 </head>
 
 <body>
-    <p id="locP" style="color: white">Loading...</p>
-    <p id="pointsP" style="color: white"></p>
-    <button onclick="Scale(0.5)">[-]</button><button onclick="Scale(2);">[+]</button>
-    <canvas id="gridCanvas" width="1000" height="1000"></canvas>
+    <div>
+        <div style="display: inline-block">
+            <p id="locP" style="color: white">Loading...</p>
+            <p id="pointsP" style="color: white"></p>
+        </div>
+        <div style="float: right;">
+            <button class="button" onclick="Scale(0.5)">[-]</button>
+            <button class="button" onclick="Scale(2);">[+]</button>
+        </div>
+    </div>
+    <canvas id="gridCanvas" style="position: absolute;" width="1000" height="1000"></canvas>
 
 
     <script src="wjh.js"></script>
