@@ -1,0 +1,251 @@
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+	<style>
+		body {
+			background-color: #000000;
+			margin: 0px;
+		}
+
+		canvas,
+		img {
+			image-rendering: optimizeSpeed;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: optimize-contrast;
+			-ms-interpolation-mode: nearest-neighbor;
+		}
+	</style>
+	<title>stuff</title>
+	<script src="chrome-extension://mooikfkahbdckldjjndioackbalphokd/assets/prompt.js"></script>
+</head>
+
+<body
+	class="tether-target tether-enabled tether-element-attached-middle tether-element-attached-right tether-target-attached-middle tether-target-attached-left">
+	<canvas id="gridCanvas" width="1920" height="963"></canvas>
+	<script type="text/javascript">
+		var ctx = document.getElementById('gridCanvas').getContext('2d');
+		ctx.canvas.width = window.innerWidth;
+		ctx.canvas.height = window.innerHeight;
+		var centerX = ctx.canvas.width / 2;
+		var centerY = ctx.canvas.height / 2;
+		var pixels;
+		var dotCount = 500;
+		var friction = 1.01;
+		var kick = 0;
+		var halfKick = kick / 2;
+
+		function randValue() {
+			return (Math.random() * 10) - 5;
+		}
+
+		const matrix = [
+			// [1,1,-1],[-1,1,1],[1,-1,1]
+			//randValue(),randValue(),randValue(),randValue(),randValue(),randValue(),randValue(),randValue(),randValue(),
+			0, 0, 0, 0, 0, 0, 0, 0, 0,
+		]
+
+		function Color(r, g, b, a) {
+			this.r = r || Math.floor(Math.random() * 255);
+			this.g = g || Math.floor(Math.random() * 255);
+			this.b = b || Math.floor(Math.random() * 255);
+			this.a = a || 255;
+		}
+
+		function Point(x, y) {
+			this.x = x || 0;
+			this.y = y || 0;
+		}
+
+		function Dot(x, y, m) {
+			var self = this;
+			self.x = x || Math.floor(Math.random() * ctx.canvas.width);
+			self.y = y || Math.floor(Math.random() * ctx.canvas.height);
+			//self.color = new Color();
+
+			self.vector = new Point((Math.random() * kick) - halfKick, (Math.random() * kick) - halfKick);
+			self.mass = m || 1;
+
+			const randColor = Math.floor(Math.random() * 3);
+
+			if (randColor == 0) { self.color = new Color(255, 1, 1); }
+			if (randColor == 1) { self.color = new Color(1, 255, 1); }
+			if (randColor == 2) { self.color = new Color(1, 1, 255); }
+			if (randColor == 3) { self.color = new Color(255, 255, 255); }
+
+			self.Bounce = function () {
+				// Bounce
+				var bounce = -.5
+				if (self.x > ctx.canvas.width) { self.x = ctx.canvas.width; self.vector.x *= bounce; }
+				if (self.x < 0) { self.x = 0; self.vector.x *= bounce; }
+				if (self.y > ctx.canvas.height) { self.y = ctx.canvas.height; self.vector.y *= bounce; }
+				if (self.y < 0) { self.y = 0; self.vector.y *= bounce; }
+			}
+
+			self.Bonk = function () {
+				// Bonk
+				if (self.x > ctx.canvas.width) { self.x = ctx.canvas.width; self.vector.x = 0; self.vector.y = 0; }
+				if (self.x < 0) { self.x = 0; self.vector.x = 0; self.vector.y = 0; }
+				if (self.y > ctx.canvas.height) { self.y = ctx.canvas.height; self.vector.x = 0; self.vector.y = 0; }
+				if (self.y < 0) { self.y = 0; self.vector.x = 0; self.vector.y = 0; }
+			}
+
+			self.Wrap = function () {
+				// wrap
+				if (self.x > ctx.canvas.width) { self.x = 0; }
+				if (self.x < 0) { self.x = ctx.canvas.width; }
+				if (self.y > ctx.canvas.height) { self.y = 0; }
+				if (self.y < 0) { self.y = ctx.canvas.height; }
+			}
+
+			self.DoMovement = function () {
+
+				self.x += self.vector.x;
+				self.y += self.vector.y;
+
+				// "friction" 
+				self.vector.x /= friction;
+				self.vector.y /= friction;
+
+				self.Wrap();
+			}
+		}
+
+		function init() {
+			var vectors = [];
+			for (var i = 0; i <= dotCount; i++) { vectors.push(new Dot(0, 0)); }
+
+			DrawGrid(vectors);
+
+		}
+
+		function DrawGrid(dots) {
+			const scale = 100;
+			const adjustValue = 1;
+			const randAdjust = (Math.random() * adjustValue) - (adjustValue * 0.5)
+			const index = Math.floor(Math.random() * 9);
+			matrix[index] += randAdjust;
+			if (matrix[index] > 10) { matrix[index] = 10; }
+			if (matrix[index] < -10) { matrix[index] = -10; }
+			for (var i = dotCount; i > 0; i--) {
+				var imo = i - 1;
+				for (var j = imo; j > 0; j--) {
+					var dx = dots[j].x - dots[i].x;
+					var dy = dots[j].y - dots[i].y;
+					dx *= scale;
+					dy *= scale;
+					var distance = Math.sqrt((dx * dx) + (dy * dy));
+					let tooClose = 1;
+					
+					if (distance !=0 ) {
+						if (distance < (5*scale)) { tooClose = -1 }
+						var mag = 1 / (distance * distance );
+						//const sameColor = dots[j].color.r === dots[i].color.r && dots[j].color.g === dots[i].color.g && dots[j].color.b === dots[i].color.b;
+						const colorDiff = (Math.abs(dots[j].color.r - dots[i].color.r) + Math.abs(dots[j].color.g - dots[i].color.g) + Math.abs(dots[j].color.b - dots[i].color.b)) / 765;
+
+
+						let vecMod = 1 - (colorDiff * 2);
+						//if (!sameColor) {vecMod = -1}
+
+						if (dots[i].color.r === 255) {
+							if (dots[j].color.r === 255) { vecMod = matrix[0]; }
+							if (dots[j].color.g === 255) { vecMod = matrix[1]; }
+							if (dots[j].color.b === 255) { vecMod = matrix[2]; }
+						}
+
+						if (dots[i].color.g === 255) {
+							if (dots[j].color.r === 255) { vecMod = matrix[3]; }
+							if (dots[j].color.g === 255) { vecMod = matrix[4]; }
+							if (dots[j].color.b === 255) { vecMod = matrix[5]; }
+						}
+
+						if (dots[i].color.b === 255) {
+							if (dots[j].color.r === 255) { vecMod = matrix[6]; }
+							if (dots[j].color.g === 255) { vecMod = matrix[7]; }
+							if (dots[j].color.b === 255) { vecMod = matrix[8]; }
+						}
+
+						dots[i].vector.x += (dx * mag * dots[j].mass * vecMod) * tooClose;
+						dots[i].vector.y += (dy * mag * dots[j].mass * vecMod) * tooClose;
+					
+						if (dots[i].vector.x > 10) {dots[i].vector.x = 10;}
+						if (dots[i].vector.x < -10) {dots[i].vector.x = -10;}
+
+						if (dots[i].vector.y > 10) {dots[i].vector.y = 10;}
+						if (dots[i].vector.y < -10) {dots[i].vector.y = -10;}
+
+						// dots[j].vector.x -= dx * mag * dots[i].mass * vecMod;
+						// dots[j].vector.y -= dy * mag * dots[i].mass * vecMod;
+					}
+				}
+			}
+
+			for (var i = dotCount; i > 0; i--) {
+				dots[i].DoMovement();
+			}
+
+
+			// clear screen
+			pixels = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+
+			var dot;
+
+			// draw
+			for (var i = dotCount; i > 0; i--) {
+				dot = dots[i];
+				var x = Math.floor(dot.x);
+				var y = Math.floor(dot.y);
+
+				if (!(x < 1 || y < 1 || x > ctx.canvas.width - 1 || y > ctx.canvas.height - 1)) {
+
+					PlacePixel(x, y, dot.color, 0);
+
+					PlacePixel(x - 1, y - 1, dot.color, 64);
+					PlacePixel(x, y - 1, dot.color, 32);
+					PlacePixel(x + 1, y - 1, dot.color, 64);
+
+					PlacePixel(x - 1, y, dot.color, 32);
+
+					PlacePixel(x + 1, y, dot.color, 32);
+
+					PlacePixel(x - 1, y + 1, dot.color, 64);
+					PlacePixel(x, y + 1, dot.color, 32);
+					PlacePixel(x + 1, y + 1, dot.color, 64);
+
+				}
+			}
+
+			ctx.putImageData(pixels, 0, 0);
+
+			setTimeout(function () { DrawGrid(dots) }, 1);
+
+		}
+
+
+
+		function PlacePixel(x, y, color, d) {
+			d = d * 2;
+			const index = (x + y * ctx.canvas.width) * 4;
+			pixels.data[index] = color.r - d;
+			pixels.data[index + 1] = color.g - d;
+			pixels.data[index + 2] = color.b - d;
+			pixels.data[index + 3] = 255;
+		}
+
+
+		init();
+	</script>
+
+
+	<div data-tether-id="1" style="top: 0px; left: 0px; position: absolute;"></div>
+	<div data-tether-id="1" style="top: 0px; left: 0px; position: absolute;"></div>
+</body>
+<div style="position: fixed; top: 431px; left: 529px;"></div><iframe src="./stuff_files/widget.html" height="auto"
+	class="tether-element tether-enabled tether-element-attached-middle tether-element-attached-right tether-target-attached-middle tether-target-attached-left"
+	style="width: 0px; height: 0px; margin: 0px; z-index: 9999; display: none; overflow: hidden; background-color: transparent; border: 0px; user-select: none; top: 0px; left: 0px; position: absolute; transform: translateX(10px) translateY(482px) translateZ(0px);"></iframe>
+<div style="position: fixed; top: 431px; left: 529px;"></div><iframe src="./stuff_files/widget(1).html" height="auto"
+	class="tether-element tether-enabled tether-element-attached-middle tether-element-attached-right tether-target-attached-middle tether-target-attached-left"
+	style="width: 352px; z-index: 9999; border: 1px solid lightgray; display: none; overflow: hidden; top: 0px; left: 0px; position: absolute; transform: translateX(10px) translateY(482px) translateZ(0px);"></iframe>
+
+</html>
